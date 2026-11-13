@@ -1,3 +1,9 @@
+SET NAMES utf8mb4;
+SET character_set_client = utf8mb4;
+SET character_set_connection = utf8mb4;
+SET character_set_results = utf8mb4;
+SET collation_connection = utf8mb4_unicode_ci;
+
 CREATE DATABASE IF NOT EXISTS pishkhan_yar CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE pishkhan_yar;
 
