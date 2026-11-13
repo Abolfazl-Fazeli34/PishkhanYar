@@ -1,0 +1,98 @@
+# ============================================================
+# PishkhanYar - Docker Compose Configuration
+# Subdomain: pishkhanyar.ip3.ir
+# Port Range: 8670-8679 (Local access only)
+# ============================================================
+
+services:
+
+  # ── PHP + Apache Application ──────────────────────────────
+  app:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: pishkhanyar_app
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_NAME: ${DB_NAME:-pishkhan_yar}
+      DB_USER: ${DB_USER:-pishkhan_user}
+      DB_PASS: ${DB_PASS:-pishkhan_pass_2024}
+    volumes:
+      - ./pishkhan-yar:/var/www/html:ro
+      - php_logs:/var/log/php
+    networks:
+      - pishkhanyar_net
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8670:80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/index.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── MySQL Database ─────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: pishkhanyar_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_pishkhan_2024}
+      MYSQL_DATABASE: ${DB_NAME:-pishkhan_yar}
+      MYSQL_USER: ${DB_USER:-pishkhan_user}
+      MYSQL_PASSWORD: ${DB_PASS:-pishkhan_pass_2024}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./pishkhan-yar/database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    networks:
+      - pishkhanyar_net
+    ports:
+      - "127.0.0.1:8671:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_pishkhan_2024}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=caching_sha2_password
+      --max_allowed_packet=64M
+      --innodb_buffer_pool_size=128M
+
+  # ── phpMyAdmin (optional - local dev tool) ─────────────────
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: pishkhanyar_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_pishkhan_2024}
+      UPLOAD_LIMIT: 64M
+    networks:
+      - pishkhanyar_net
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8672:80"
+
+# ── Volumes ────────────────────────────────────────────────────
+volumes:
+  mysql_data:
+    name: pishkhanyar_mysql_data
+  php_logs:
+    name: pishkhanyar_php_logs
+
+# ── Networks ───────────────────────────────────────────────────
+networks:
+  pishkhanyar_net:
+    name: pishkhanyar_network
+    driver: bridge

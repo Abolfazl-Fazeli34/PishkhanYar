@@ -1,0 +1,39 @@
+# ── Git ───────────────────────────────────────────────────
+.git/
+
+# ── Environment & Secrets ──────────────────────────────────
+.env
+*.env.local
+*.env.production
+
+# ── OS & Editor files ─────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.iml
+
+# ── Logs ──────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Database dumps (sensitive) ────────────────────────────
+pishkhan-yar/database/*.sql.bak
+pishkhan-yar/database/pishkhan_yar.sql
+
+# ── SQLite (dev only - MySQL used in production) ──────────
+pishkhan-yar/database/*.sqlite
+
+# ── Node (if ever added) ──────────────────────────────────
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ── PHP cache ─────────────────────────────────────────────
+*.cache
